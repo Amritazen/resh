@@ -1,0 +1,13 @@
+.env
+chroma_db/
+uploads/
+data/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+node_modules/
+.gemini/

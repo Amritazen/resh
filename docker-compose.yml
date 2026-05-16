@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  resh:
+    build: .
+    container_name: resh_app
+    ports:
+      - "8080:8080"
+    # Persist data outside the container
+    volumes:
+      - ./uploads:/app/uploads
+      - ./data:/app/data
+      - ./chroma_db:/app/chroma_db
+    # Pass environment variables
+    env_file:
+      - .env
+    restart: unless-stopped
