@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resh — Ask Anything</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sidebar-bg:      #EAF4FB;
+      --sidebar-border:  #C5DFF0;
+      --card-bg:         #FFFFFF;
+      --card-border:     #B8D8ED;
+      --card-active:     #3A8FBF;
+      --blue-dark:       #1A3A4A;
+      --blue-rich:       #3A8FBF;
+      --blue-mid:        #5BA3C9;
+      --blue-muted:      #5A7A8A;
+      --white:           #FFFFFF;
+      --cream:           #EAF4FB; /* Changed to match sidebar light blue */
+      --biscuit:         #C5DFF0; /* Changed to match sidebar border */
+      --biscuit-border:  #B8D8ED;
+      --ink:             #1A3A4A; /* Consistent blue-ink text */
+      --ink-cream:       #EAF4FB; /* Consistent light blue bg */
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+    }
+
+    body {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* LEFT SIDEBAR */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      max-width: 260px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .brand-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      width: 100%;
+    }
+
+    .jelly-container {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
+      font-weight: 600;
+      color: var(--blue-dark);
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .tagline {
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--blue-muted);
+      margin-bottom: 20px;
+      width: 100%;
+      display: block;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--sidebar-border);
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .mode-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: var(--blue-muted);
+      margin-bottom: 12px;
+      width: 100%;
+      display: block;
+    }
+
+    .mode-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .card {
+      width: 100%;
+      border-radius: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .card-header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--blue-dark);
+      white-space: nowrap;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--blue-muted);
+      line-height: 1.5;
+      margin-left: 28px;
+    }
+
+    /* CARD 1: Chat with file (Inactive) */
+    .card-file {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid var(--sidebar-border);
+    }
+    .card-file:hover {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .arrow-right {
+      margin-left: auto;
+      font-size: 13px;
+      color: var(--blue-muted);
+    }
+
+    /* CARD 2: Ask anything (Active) */
+    .card-ask {
+      background: var(--white);
+      border: 1px solid var(--card-border);
+      border-left: 3px solid var(--card-active);
+      box-shadow: 0 2px 8px rgba(58, 143, 191, 0.1);
+      cursor: default;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      font-size: 11px;
+      color: var(--blue-muted);
+      text-align: center;
+      width: 100%;
+    }
+
+    /* RIGHT CHAT AREA */
+    .chat-area {
+      flex: 1;
+      min-width: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--white);
+      overflow: hidden;
+    }
+
+    .top-bar {
+      height: 56px;
+      min-height: 56px;
+      background: var(--white);
+      border-bottom: 1px solid var(--biscuit);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .top-bar-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--blue-dark);
+    }
+
+    .mode-badge {
+      background: #D6EEF8;
+      color: var(--blue-dark);
+      padding: 5px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .messages-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .messages-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .msg-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+      width: 100%;
+    }
+
+    .msg-row.bot {
+      flex-direction: row;
+    }
+
+    .msg-row.user {
+      flex-direction: row-reverse;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .avatar.bot {
+      background: #D6EEF8;
+    }
+
+    .avatar.user {
+      background: var(--blue-dark);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .bubble {
+      padding: 12px 16px;
+      max-width: 75%;
+      font-size: 14px;
+      line-height: 1.7;
+      word-wrap: break-word;
+    }
+
+    .bubble.bot {
+      background: var(--sidebar-bg);
+      border: 1px solid var(--sidebar-border);
+      border-radius: 0 16px 16px 16px;
+      color: var(--sidebar-text);
+    }
+
+    .bubble.user {
+      background: var(--blue-dark);
+      color: var(--white);
+      border-radius: 16px 0 16px 16px;
+    }
+
+    .typing-dots {
+      display: flex;
+      align-items: center;
+      height: 14px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--blue-mid);
+      border-radius: 50%;
+      display: inline-block;
+      margin: 0 2px;
+      animation: bounce 1.2s infinite;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    .bottom-bar {
+      flex-shrink: 0;
+      background: var(--white);
+      border-top: 1px solid var(--biscuit);
+      padding: 16px 24px;
+    }
+
+    .input-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #chatInput {
+      flex: 1;
+      background: var(--sidebar-bg);
+      border: 1px solid var(--sidebar-border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 14px;
+      color: var(--sidebar-text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #chatInput:focus {
+      border-color: var(--sidebar-accent);
+    }
+
+    #sendBtn {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 50%;
+      background: var(--sidebar-text);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    #sendBtn:hover {
+      background: var(--blue-rich);
+    }
+
+    #sendBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    /* MOBILE RESPONSIVENESS */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.active {
+        left: 0;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.3);
+        z-index: 999;
+      }
+      .sidebar-overlay.active { display: block; }
+
+      .menu-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: var(--sidebar-bg);
+        border: 1px solid var(--sidebar-border);
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+
+      .top-bar { padding: 0 16px; }
+      .messages-inner { padding: 0 16px; }
+      .bubble { max-width: 85%; }
+      .bottom-bar { padding: 12px 16px; }
+    }
+
+    .menu-btn { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand-row">
+      <div id="sidebar-jelly" class="jelly-container"></div>
+      <span class="brand-text">Resh</span>
+    </div>
+    <span class="tagline">Sharp answers. Real knowledge.</span>
+    
+    <div class="sidebar-divider"></div>
+    
+    <span class="mode-label">CHOOSE A MODE</span>
+    
+    <div class="mode-cards">
+      <a href="/file-chat" class="card card-file">
+        <div class="card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue-rich)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span class="card-title">Chat with file</span>
+          <span class="arrow-right">→</span>
+        </div>
+        <p class="card-desc">Upload a file and chat with its content</p>
+      </a>
+      
+      <div class="card card-ask">
+        <div class="card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue-rich)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span class="card-title">Ask anything</span>
+        </div>
+        <p class="card-desc">Ask from general knowledge, no file needed</p>
+      </div>
+    </div>
+    
+    <div class="sidebar-bottom"></div>
+  </aside>
+
+  <!-- RIGHT CHAT AREA -->
+  <main class="chat-area">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="menu-btn" id="menuBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue-dark)" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div id="topbar-jelly" class="jelly-container"></div>
+        <span class="top-bar-brand">Resh</span>
+      </div>
+      <div class="mode-badge">Ask anything</div>
+    </div>
+
+    <div class="messages-area" id="messagesArea">
+      <div class="messages-inner" id="messagesWrapper">
+        <!-- Messages will be added here -->
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="input-inner">
+        <input type="text" id="chatInput" placeholder="Ask Resh something..." autocomplete="off">
+        <button id="sendBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function jellyfishSVG(w, h) {
+      return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 40 52" xmlns="http://www.w3.org/2000/svg">' +
+      '<ellipse cx="20" cy="18" rx="18" ry="14" fill="rgba(91,163,201,0.25)" stroke="rgba(91,163,201,0.85)" stroke-width="1.2"/>' +
+      '<ellipse cx="20" cy="18" rx="14" ry="10" fill="rgba(255,255,255,0.15)"/>' +
+      '<ellipse cx="14" cy="12" rx="6" ry="4" fill="rgba(255,255,255,0.55)"/>' +
+      '<ellipse cx="23" cy="15" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.35)"/>' +
+      '<ellipse cx="20" cy="20" rx="10" ry="6" fill="rgba(58,143,191,0.12)"/>' +
+      '<ellipse cx="20" cy="28" rx="18" ry="4" fill="rgba(91,163,201,0.15)" stroke="rgba(91,163,201,0.45)" stroke-width="0.8"/>' +
+      '<ellipse cx="20" cy="27" rx="12" ry="2" fill="rgba(255,255,255,0.2)"/>' +
+      '<circle cx="15" cy="17" r="2" fill="#1A3A4A"/>' +
+      '<circle cx="25" cy="17" r="2" fill="#1A3A4A"/>' +
+      '<circle cx="15.8" cy="16.2" r="0.7" fill="white"/>' +
+      '<circle cx="25.8" cy="16.2" r="0.7" fill="white"/>' +
+      '<path d="M 15 21 Q 20 24.5 25 21" stroke="#2A6A8A" stroke-width="0.9" fill="none" stroke-linecap="round"/>' +
+      '<path d="M 7 30 C 4 35 10 39 7 44 C 4 47 8 49 7 51" stroke="rgba(58, 143, 191, 0.65)" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
+      '<path d="M 11 31 C 8 36 14 40 11 45 C 8 48 12 50 11 52" stroke="rgba(58, 143, 191, 0.65)" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
+      '<path d="M 15 32 C 12 37 18 41 15 46 C 12 49 16 51 15 52" stroke="rgba(58, 143, 191, 0.65)" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
+      '<path d="M 20 32 C 17 38 23 42 20 47 C 17 50 21 52 20 52" stroke="rgba(58, 143, 191, 0.65)" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
+      '<path d="M 25 32 C 22 37 28 41 25 46 C 22 49 26 51 25 52" stroke="rgba(58, 143, 191, 0.65)" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
+      '<path d="M 29 31 C 26 36 32 40 29 45 C 26 48 30 50 29 52" stroke="rgba(58, 143, 191, 0.65)" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
+      '<path d="M 33 30 C 30 35 36 39 33 44 C 30 47 34 49 33 51" stroke="rgba(58, 143, 191, 0.65)" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
+      '</svg>';
+    }
+
+    // Initialize svgs
+    document.getElementById('sidebar-jelly').innerHTML = jellyfishSVG(36, 46);
+    document.getElementById('topbar-jelly').innerHTML = jellyfishSVG(22, 28);
+
+    // Mobile Sidebar Logic
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    menuBtn.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+
+    const messagesArea = document.getElementById('messagesArea');
+    const messagesWrapper = document.getElementById('messagesWrapper');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function scrollToBottom() {
+      messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    function addBotMessage(text) {
+      const row = document.createElement('div');
+      row.className = 'msg-row bot';
+      row.innerHTML = `
+        <div class="avatar bot">${jellyfishSVG(18, 23)}</div>
+        <div class="bubble bot">${text}</div>
+      `;
+      messagesWrapper.appendChild(row);
+      scrollToBottom();
+    }
+
+    function addUserMessage(text) {
+      const row = document.createElement('div');
+      row.className = 'msg-row user';
+      row.innerHTML = `
+        <div class="avatar user">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="bubble user">${text}</div>
+      `;
+      messagesWrapper.appendChild(row);
+      scrollToBottom();
+    }
+
+    function showTyping() {
+      const row = document.createElement('div');
+      row.className = 'msg-row bot';
+      row.id = 'typingIndicator';
+      row.innerHTML = `
+        <div class="avatar bot">${jellyfishSVG(18, 23)}</div>
+        <div class="bubble bot">
+          <div class="typing-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+      `;
+      messagesWrapper.appendChild(row);
+      scrollToBottom();
+    }
+
+    function hideTyping() {
+      const el = document.getElementById('typingIndicator');
+      if (el) el.remove();
+    }
+
+    async function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      addUserMessage(text);
+      chatInput.value = '';
+      
+      chatInput.disabled = true;
+      sendBtn.disabled = true;
+      showTyping();
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, mode: 'direct' })
+        });
+        const data = await response.json();
+        
+        hideTyping();
+        addBotMessage(data.response || "Sorry, I encountered an error.");
+      } catch (err) {
+        hideTyping();
+        addBotMessage("Error connecting to server. Please try again.");
+      } finally {
+        chatInput.disabled = false;
+        sendBtn.disabled = false;
+        chatInput.focus();
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    // Welcome message
+    window.onload = () => {
+      addBotMessage("Hi! I am Resh. Ask me anything from general knowledge.");
+      chatInput.focus();
+    };
+  </script>
+</body>
+</html>
