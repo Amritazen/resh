@@ -46,10 +46,10 @@ def get_llm():
     if not api_key:
         raise ValueError("GOOGLE_API_KEY not found in environment. Please check your .env file.")
     
-    print(f"DEBUG: Gemini API Key found (starts with: {api_key[:8]})")
+    # Debug print removed for performance
     
     return ChatGoogleGenerativeAI(
-        model="gemini-3-flash-preview",
+        model="gemini-1.5-flash",
         temperature=0.3,
         google_api_key=api_key,
         convert_system_message_to_human=True
@@ -65,15 +65,15 @@ def get_rag_answer(question):
         db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings)
         
         # Similarity search with k=8
-        results = db.similarity_search(question, k=8)
+        results = db.similarity_search(question, k=4)
         
         if not results:
             return "I could not find any relevant information in the uploaded document."
             
-        # Print chunks to terminal for debugging
-        print(f"\n--- RETRIEVED {len(results)} CHUNKS ---")
-        for i, res in enumerate(results):
-            print(f"Chunk {i+1}: {res.page_content[:100]}...")
+        # Debug prints removed for faster response
+        # print(f"\n--- RETRIEVED {len(results)} CHUNKS ---")
+        # for i, res in enumerate(results):
+        #     print(f"Chunk {i+1}: {res.page_content[:100]}...")
         
         context = "\n---\n".join([res.page_content for res in results])
         

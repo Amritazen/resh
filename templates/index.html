@@ -367,7 +367,7 @@
       height: 44px;
       min-width: 44px;
       border-radius: 50%;
-      background: var(--sidebar-text);
+      background: var(--blue-dark);
       border: none;
       cursor: pointer;
       display: flex;
@@ -527,9 +527,11 @@
       '</svg>';
     }
 
-    // Initialize svgs
-    document.getElementById('sidebar-jelly').innerHTML = jellyfishSVG(36, 46);
-    document.getElementById('topbar-jelly').innerHTML = jellyfishSVG(22, 28);
+    // Initialize svgs — must run after DOM is ready
+    function initJellyfish() {
+      document.getElementById('sidebar-jelly').innerHTML = jellyfishSVG(36, 46);
+      document.getElementById('topbar-jelly').innerHTML = jellyfishSVG(24, 30);
+    }
 
     // Mobile Sidebar Logic
     const menuBtn = document.getElementById('menuBtn');
@@ -641,6 +643,7 @@
 
     // Welcome message
     window.onload = () => {
+      initJellyfish();
       addBotMessage("Hi! I am Resh. Ask me anything from general knowledge.");
       chatInput.focus();
     };
