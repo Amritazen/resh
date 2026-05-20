@@ -137,22 +137,20 @@ def ingest_single_file(filepath: str):
     print(f"Created {len(chunks)} chunks")
 
     embeddings = get_embeddings()
+    embeddings = get_embeddings()
     if os.path.exists(CHROMA_PATH):
-        # Safely add to existing ChromaDB
-        db = Chroma(
-            persist_directory=CHROMA_PATH,
-            embedding_function=embeddings
-        )
-        db.add_documents(chunks)
-        print("Added to existing ChromaDB collection.")
-    else:
-        # Create fresh ChromaDB
-        Chroma.from_documents(
-            chunks,
-            embeddings,
-            persist_directory=CHROMA_PATH
-        )
-        print("Created new ChromaDB collection.")
+        try:
+            shutil.rmtree(CHROMA_PATH)
+            print("Old ChromaDB cleared for new file.")
+        except Exception as e:
+            print(f"Warning: Could not clear old ChromaDB: {e}")
+            
+    Chroma.from_documents(
+        chunks,
+        embeddings,
+        persist_directory=CHROMA_PATH
+    )
+    print("Created new ChromaDB collection.")
     
     print(f"Done. Ingested: {os.path.basename(filepath)}")
 
