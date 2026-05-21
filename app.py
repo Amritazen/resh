@@ -1,10 +1,12 @@
-import os
+# Trigger redeploy
 import sys
+import uuid
 import traceback
+
 # At very top before everything
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from chatbot import get_rag_answer, get_direct_answer
@@ -13,12 +15,16 @@ from ingest import ingest_single_file
 app = Flask(__name__)
 CORS(app)
 
+# SECRET KEY — required for session to work
+# Change this to a long random string for production
+app.secret_key = os.environ.get("SECRET_KEY", "resh-secret-key-change-this-2024")
+
 # Directory setup
 UPLOAD_FOLDER = "uploads"
 DATA_FOLDER = "data"
-CHROMA_PATH = "chroma_db"
+CHROMA_BASE_PATH = "chroma_sessions"  # Each user gets a subfolder here
 
-for folder in [UPLOAD_FOLDER, DATA_FOLDER, CHROMA_PATH]:
+for folder in [UPLOAD_FOLDER, DATA_FOLDER, CHROMA_BASE_PATH]:
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -26,6 +32,16 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf', 'txt', 'docx', 'pptx'}
+
+def get_session_id():
+    """Get or create a unique session ID for this user."""
+    if 'session_id' not in session:
+        session['session_id'] = str(uuid.uuid4())
+    return session['session_id']
+
+def get_chroma_path(session_id):
+    """Get the ChromaDB path for a specific session."""
+    return os.path.join(CHROMA_BASE_PATH, session_id)
 
 @app.route("/")
 def landing():
@@ -48,17 +64,19 @@ def chat():
         data = request.json
         message = data.get("message", "").strip()
         mode = data.get("mode", "direct")
-        
+
         if not message:
             return jsonify({"response": "Please type something."})
-        
+
         if mode == "upload":
-            answer = get_rag_answer(message)
+            session_id = get_session_id()
+            chroma_path = get_chroma_path(session_id)
+            answer = get_rag_answer(message, chroma_path)
         else:
             answer = get_direct_answer(message)
-            
+
         return jsonify({"response": str(answer)})
-        
+
     except Exception as e:
         traceback.print_exc()
         return jsonify({"response": f"Error: {str(e)}"})
@@ -70,32 +88,35 @@ def upload_file():
             return jsonify({"success": False, "error": "No file part in request."})
 
         file = request.files['file']
+
         if file.filename == '':
             return jsonify({"success": False, "error": "No selected file."})
 
         if file and allowed_file(file.filename):
+            # Get unique session ID for this user
+            session_id = get_session_id()
+
             original_filename = secure_filename(file.filename)
-            filename = original_filename
-            # Ensure unique filename to avoid overwrite
-            counter = 1
-            while os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
-                name, ext = os.path.splitext(original_filename)
-                filename = f"{name}_{counter}{ext}"
-                counter += 1
-            # Save to upload folder (relative path) and get absolute path for ingestion
+            # Prefix filename with session_id to avoid conflicts between users
+            filename = f"{session_id}_{original_filename}"
+
             rel_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(rel_path)
             abs_path = os.path.abspath(rel_path)
-            # Ingest the file and handle any exceptions
+
+            # Get this user's own ChromaDB path
+            chroma_path = get_chroma_path(session_id)
+
             try:
-                ingest_single_file(abs_path)
+                ingest_single_file(abs_path, chroma_path)
             except Exception as e:
                 traceback.print_exc()
                 return jsonify({"success": False, "error": f"Ingestion failed: {str(e)}"})
 
-            return jsonify({"success": True, "filename": filename})
+            return jsonify({"success": True, "filename": original_filename})
         else:
             return jsonify({"success": False, "error": "File type not supported."})
+
     except Exception as e:
         traceback.print_exc()
         return jsonify({"success": False, "error": f"Upload error: {str(e)}"})
