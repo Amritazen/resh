@@ -5,24 +5,13 @@ import traceback
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
-
-# HOW TO RUN RESH
-# 1. Add your Gemini key to .env file
-# 2. pip install -r requirements.txt
-# 3. python ingest.py (if you have files in data/)
-# 4. python app.py
-# 5. Open http://localhost:8080 (Landing Page)
-# 6. For chatbot go to http://localhost:8080/ask
-# 7. For file chat go to http://localhost:8080/file-chat
-
-load_dotenv()
-
 from chatbot import get_rag_answer, get_direct_answer
 from ingest import ingest_single_file
 
 app = Flask(__name__)
+CORS(app)
 
 # Directory setup
 UPLOAD_FOLDER = "uploads"
@@ -40,7 +29,7 @@ def allowed_file(filename):
 
 @app.route("/")
 def landing():
-    """NEW: Landing page as the entry point"""
+    """Landing page"""
     return render_template("landing.html")
 
 @app.route("/ask")
@@ -68,10 +57,7 @@ def chat():
         else:
             answer = get_direct_answer(message)
             
-        answer = str(answer)
-        print(f"Resh ({mode}): {answer[:100]}...")
-        
-        return jsonify({"response": answer})
+        return jsonify({"response": str(answer)})
         
     except Exception as e:
         traceback.print_exc()
@@ -82,25 +68,37 @@ def upload_file():
     try:
         if 'file' not in request.files:
             return jsonify({"success": False, "error": "No file part in request."})
-        
+
         file = request.files['file']
         if file.filename == '':
             return jsonify({"success": False, "error": "No selected file."})
-        
+
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            
-            ingest_single_file(filepath)
-            
+            original_filename = secure_filename(file.filename)
+            filename = original_filename
+            # Ensure unique filename to avoid overwrite
+            counter = 1
+            while os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
+                name, ext = os.path.splitext(original_filename)
+                filename = f"{name}_{counter}{ext}"
+                counter += 1
+            # Save to upload folder (relative path) and get absolute path for ingestion
+            rel_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(rel_path)
+            abs_path = os.path.abspath(rel_path)
+            # Ingest the file and handle any exceptions
+            try:
+                ingest_single_file(abs_path)
+            except Exception as e:
+                traceback.print_exc()
+                return jsonify({"success": False, "error": f"Ingestion failed: {str(e)}"})
+
             return jsonify({"success": True, "filename": filename})
         else:
             return jsonify({"success": False, "error": "File type not supported."})
-            
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)})
+        return jsonify({"success": False, "error": f"Upload error: {str(e)}"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))

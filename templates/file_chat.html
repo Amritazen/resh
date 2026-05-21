@@ -416,6 +416,8 @@
     }
 
     // Initialize svgs — must run after DOM is ready
+    // Base URL for API calls (works on Railway and local)
+    const baseUrl = window.location.origin;
     function initJellyfish() {
       document.getElementById('sidebar-jelly').innerHTML = jellyfishSVG(40, 52);
       const topbarJelly = document.getElementById('topbar-jelly');
@@ -475,7 +477,7 @@
         formData.append('file', fileInput.files[0]);
 
         try {
-            const res = await fetch('/upload', { method: 'POST', body: formData });
+            const res = await fetch(window.location.origin + '/upload', { method: 'POST', body: formData, cache: 'no-store' });
             const data = await res.json();
             if (data.success) {
                 fileUploaded = true;
@@ -529,10 +531,11 @@
       scrollToBottom();
       
       try {
-        const res = await fetch('/chat', {
+        const res = await fetch(window.location.origin + '/chat', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({message: text, mode: "upload"})
+          body: JSON.stringify({message: text, mode: "upload"}),
+          cache: 'no-store'
         });
         const data = await res.json();
         container.removeChild(typingDiv);
