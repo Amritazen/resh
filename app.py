@@ -1,9 +1,8 @@
-# Trigger redeploy
+import os
 import sys
 import uuid
 import traceback
 
-# At very top before everything
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
 from flask import Flask, request, jsonify, render_template, session
@@ -16,8 +15,7 @@ app = Flask(__name__)
 CORS(app)
 
 # SECRET KEY — required for session to work
-# Change this to a long random string for production
-app.secret_key = os.environ.get("SECRET_KEY", "resh-secret-key-change-this-2024")
+app.secret_key = os.environ.get("SECRET_KEY", "resh-secret-key-2024")
 
 # Directory setup
 UPLOAD_FOLDER = "uploads"
@@ -45,17 +43,14 @@ def get_chroma_path(session_id):
 
 @app.route("/")
 def landing():
-    """Landing page"""
     return render_template("landing.html")
 
 @app.route("/ask")
 def index():
-    """Chatbot 'Ask anything' page"""
     return render_template("index.html")
 
 @app.route("/file-chat")
 def file_chat_page():
-    """Chat with file page"""
     return render_template("file_chat.html")
 
 @app.route("/chat", methods=["POST"])
@@ -93,18 +88,15 @@ def upload_file():
             return jsonify({"success": False, "error": "No selected file."})
 
         if file and allowed_file(file.filename):
-            # Get unique session ID for this user
             session_id = get_session_id()
 
             original_filename = secure_filename(file.filename)
-            # Prefix filename with session_id to avoid conflicts between users
             filename = f"{session_id}_{original_filename}"
 
             rel_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(rel_path)
             abs_path = os.path.abspath(rel_path)
 
-            # Get this user's own ChromaDB path
             chroma_path = get_chroma_path(session_id)
 
             try:
