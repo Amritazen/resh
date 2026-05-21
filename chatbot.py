@@ -10,8 +10,7 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 
 load_dotenv()
 
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
 
@@ -57,7 +56,10 @@ def get_llm():
 
 def get_rag_answer(question):
     try:
-        embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            return "GOOGLE_API_KEY not found in environment. Please check your config."
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=api_key)
         
         if not os.path.exists(CHROMA_PATH):
             return "No documents uploaded yet. Please upload a file first."

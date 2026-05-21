@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
@@ -90,8 +90,12 @@ def get_splitter():
     )
 
 def get_embeddings():
-    return SentenceTransformerEmbeddings(
-        model_name="all-MiniLM-L6-v2"
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_API_KEY not found in environment. Please check your config.")
+    return GoogleGenerativeAIEmbeddings(
+        model="models/text-embedding-004",
+        google_api_key=api_key
     )
 
 def ingest_single_file(filepath: str):
