@@ -23,28 +23,30 @@
       --ink:             #1A3A4A; /* Consistent blue-ink text */
       --ink-cream:       #EAF4FB; /* Consistent light blue bg */
     }
-
+ 
     * { 
       box-sizing: border-box; 
       margin: 0; 
       padding: 0; 
     }
-
+ 
     html, body {
       height: 100%;
       width: 100%;
       overflow: hidden;
       font-family: 'DM Sans', sans-serif;
       background: var(--white);
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
-
+ 
     body {
       display: flex;
       flex-direction: row;
       height: 100vh;
       width: 100vw;
     }
-
+ 
     /* LEFT SIDEBAR */
     .sidebar {
       width: 260px;
@@ -59,7 +61,7 @@
       overflow: hidden;
       flex-shrink: 0;
     }
-
+ 
     .brand-row {
       display: flex;
       flex-direction: row;
@@ -68,14 +70,14 @@
       margin-bottom: 6px;
       width: 100%;
     }
-
+ 
     .jelly-container {
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-
+ 
     .brand-text {
       font-family: 'Cormorant Garamond', serif;
       font-size: 30px;
@@ -84,7 +86,7 @@
       white-space: nowrap;
       line-height: 1;
     }
-
+ 
     .tagline {
       font-size: 12px;
       font-weight: 300;
@@ -93,14 +95,14 @@
       width: 100%;
       display: block;
     }
-
+ 
     .sidebar-divider {
       height: 1px;
       background: var(--sidebar-border);
       margin-bottom: 20px;
       width: 100%;
     }
-
+ 
     .mode-label {
       font-size: 11px;
       font-weight: 500;
@@ -110,14 +112,14 @@
       width: 100%;
       display: block;
     }
-
+ 
     .mode-cards {
       display: flex;
       flex-direction: column;
       gap: 10px;
       width: 100%;
     }
-
+ 
     .card {
       width: 100%;
       border-radius: 12px;
@@ -129,7 +131,7 @@
       gap: 6px;
       text-decoration: none;
     }
-
+ 
     .card-header {
       display: flex;
       flex-direction: row;
@@ -137,21 +139,21 @@
       gap: 10px;
       width: 100%;
     }
-
+ 
     .card-title {
       font-size: 14px;
       font-weight: 500;
       color: var(--blue-dark);
       white-space: nowrap;
     }
-
+ 
     .card-desc {
       font-size: 12px;
       color: var(--blue-muted);
       line-height: 1.5;
       margin-left: 28px;
     }
-
+ 
     /* CARD 1: Chat with file (Inactive) */
     .card-file {
       background: rgba(255, 255, 255, 0.4);
@@ -160,13 +162,13 @@
     .card-file:hover {
       background: rgba(255, 255, 255, 0.6);
     }
-
+ 
     .arrow-right {
       margin-left: auto;
       font-size: 13px;
       color: var(--blue-muted);
     }
-
+ 
     /* CARD 2: Ask anything (Active) */
     .card-ask {
       background: var(--white);
@@ -175,7 +177,7 @@
       box-shadow: 0 2px 8px rgba(58, 143, 191, 0.1);
       cursor: default;
     }
-
+ 
     .sidebar-bottom {
       margin-top: auto;
       font-size: 11px;
@@ -183,7 +185,7 @@
       text-align: center;
       width: 100%;
     }
-
+ 
     /* RIGHT CHAT AREA */
     .chat-area {
       flex: 1;
@@ -194,7 +196,7 @@
       background: var(--white);
       overflow: hidden;
     }
-
+ 
     .top-bar {
       height: 56px;
       min-height: 56px;
@@ -206,20 +208,20 @@
       justify-content: space-between;
       flex-shrink: 0;
     }
-
+ 
     .top-bar-left {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
+ 
     .top-bar-brand {
       font-family: 'Cormorant Garamond', serif;
       font-size: 18px;
       font-weight: 600;
       color: var(--blue-dark);
     }
-
+ 
     .mode-badge {
       background: #D6EEF8;
       color: var(--blue-dark);
@@ -228,7 +230,7 @@
       font-size: 12px;
       font-weight: 500;
     }
-
+ 
     .messages-area {
       flex: 1;
       overflow-y: auto;
@@ -237,7 +239,7 @@
       flex-direction: column;
       width: 100%;
     }
-
+ 
     .messages-inner {
       max-width: 720px;
       margin: 0 auto;
@@ -247,7 +249,7 @@
       flex-direction: column;
       gap: 4px;
     }
-
+ 
     .msg-row {
       display: flex;
       align-items: flex-start;
@@ -255,15 +257,15 @@
       padding: 8px 0;
       width: 100%;
     }
-
+ 
     .msg-row.bot {
       flex-direction: row;
     }
-
+ 
     .msg-row.user {
       flex-direction: row-reverse;
     }
-
+ 
     .avatar {
       width: 32px;
       height: 32px;
@@ -274,18 +276,18 @@
       justify-content: center;
       flex-shrink: 0;
     }
-
+ 
     .avatar.bot {
       background: #D6EEF8;
     }
-
+ 
     .avatar.user {
       background: var(--blue-dark);
       color: var(--white);
       font-size: 13px;
       font-weight: 500;
     }
-
+ 
     .bubble {
       padding: 12px 16px;
       max-width: 75%;
@@ -293,26 +295,26 @@
       line-height: 1.7;
       word-wrap: break-word;
     }
-
+ 
     .bubble.bot {
       background: var(--sidebar-bg);
       border: 1px solid var(--sidebar-border);
       border-radius: 0 16px 16px 16px;
       color: var(--sidebar-text);
     }
-
+ 
     .bubble.user {
       background: var(--blue-dark);
       color: var(--white);
       border-radius: 16px 0 16px 16px;
     }
-
+ 
     .typing-dots {
       display: flex;
       align-items: center;
       height: 14px;
     }
-
+ 
     .dot {
       width: 7px;
       height: 7px;
@@ -322,22 +324,22 @@
       margin: 0 2px;
       animation: bounce 1.2s infinite;
     }
-
+ 
     .dot:nth-child(2) { animation-delay: 0.2s; }
     .dot:nth-child(3) { animation-delay: 0.4s; }
-
+ 
     @keyframes bounce {
       0%, 60%, 100% { transform: translateY(0); }
       30% { transform: translateY(-6px); }
     }
-
+ 
     .bottom-bar {
       flex-shrink: 0;
       background: var(--white);
       border-top: 1px solid var(--biscuit);
       padding: 16px 24px;
     }
-
+ 
     .input-inner {
       max-width: 720px;
       margin: 0 auto;
@@ -345,23 +347,23 @@
       gap: 10px;
       align-items: center;
     }
-
+ 
     #chatInput {
       flex: 1;
       background: var(--sidebar-bg);
       border: 1px solid var(--sidebar-border);
       border-radius: 12px;
       padding: 12px 18px;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--sidebar-text);
       outline: none;
       transition: border-color 0.2s;
     }
-
+ 
     #chatInput:focus {
       border-color: var(--sidebar-accent);
     }
-
+ 
     #sendBtn {
       width: 44px;
       height: 44px;
@@ -375,11 +377,11 @@
       justify-content: center;
       transition: all 0.2s;
     }
-
+ 
     #sendBtn:hover {
       background: var(--blue-rich);
     }
-
+ 
     #sendBtn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
@@ -403,7 +405,7 @@
         z-index: 999;
       }
       .sidebar-overlay.active { display: block; }
-
+ 
       .menu-btn {
         display: flex !important;
         align-items: center;
@@ -416,18 +418,19 @@
         cursor: pointer;
         margin-right: 10px;
       }
-
+ 
       .top-bar { padding: 0 16px; }
-      .messages-inner { padding: 0 16px; }
-      .bubble { max-width: 85%; }
-      .bottom-bar { padding: 12px 16px; }
+      .messages-inner { padding: 0 12px; }
+      .bubble { max-width: 88%; font-size: 14px; }
+      .bottom-bar { padding: 10px 12px; }
+      #chatInput { font-size: 16px; padding: 11px 14px; }
     }
-
+ 
     .menu-btn { display: none; }
   </style>
 </head>
 <body>
-
+ 
   <!-- LEFT SIDEBAR -->
   <aside class="sidebar">
     <div class="brand-row">
@@ -468,7 +471,7 @@
     
     <div class="sidebar-bottom"></div>
   </aside>
-
+ 
   <!-- RIGHT CHAT AREA -->
   <main class="chat-area">
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -482,13 +485,13 @@
       </div>
       <div class="mode-badge">Ask anything</div>
     </div>
-
+ 
     <div class="messages-area" id="messagesArea">
       <div class="messages-inner" id="messagesWrapper">
         <!-- Messages will be added here -->
       </div>
     </div>
-
+ 
     <div class="bottom-bar">
       <div class="input-inner">
         <input type="text" id="chatInput" placeholder="Ask Resh something..." autocomplete="off">
@@ -501,7 +504,7 @@
       </div>
     </div>
   </main>
-
+ 
   <script>
     function jellyfishSVG(w, h) {
       return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 40 52" xmlns="http://www.w3.org/2000/svg">' +
@@ -526,35 +529,35 @@
       '<path d="M 33 30 C 30 35 36 39 33 44 C 30 47 34 49 33 51" stroke="rgba(58, 143, 191, 0.65)" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
       '</svg>';
     }
-
+ 
     // Initialize svgs — must run after DOM is ready
     function initJellyfish() {
       document.getElementById('sidebar-jelly').innerHTML = jellyfishSVG(36, 46);
       document.getElementById('topbar-jelly').innerHTML = jellyfishSVG(24, 30);
     }
-
+ 
     // Mobile Sidebar Logic
     const menuBtn = document.getElementById('menuBtn');
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('sidebarOverlay');
-
+ 
     function toggleSidebar() {
       sidebar.classList.toggle('active');
       overlay.classList.toggle('active');
     }
-
+ 
     menuBtn.addEventListener('click', toggleSidebar);
     overlay.addEventListener('click', toggleSidebar);
-
+ 
     const messagesArea = document.getElementById('messagesArea');
     const messagesWrapper = document.getElementById('messagesWrapper');
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendBtn');
-
+ 
     function scrollToBottom() {
       messagesArea.scrollTop = messagesArea.scrollHeight;
     }
-
+ 
     function addBotMessage(text) {
       const row = document.createElement('div');
       row.className = 'msg-row bot';
@@ -565,7 +568,7 @@
       messagesWrapper.appendChild(row);
       scrollToBottom();
     }
-
+ 
     function addUserMessage(text) {
       const row = document.createElement('div');
       row.className = 'msg-row user';
@@ -581,7 +584,7 @@
       messagesWrapper.appendChild(row);
       scrollToBottom();
     }
-
+ 
     function showTyping() {
       const row = document.createElement('div');
       row.className = 'msg-row bot';
@@ -599,23 +602,23 @@
       messagesWrapper.appendChild(row);
       scrollToBottom();
     }
-
+ 
     function hideTyping() {
       const el = document.getElementById('typingIndicator');
       if (el) el.remove();
     }
-
+ 
     async function sendMessage() {
       const text = chatInput.value.trim();
       if (!text) return;
-
+ 
       addUserMessage(text);
       chatInput.value = '';
       
       chatInput.disabled = true;
       sendBtn.disabled = true;
       showTyping();
-
+ 
       try {
         const response = await fetch('/chat', {
           method: 'POST',
@@ -635,12 +638,12 @@
         chatInput.focus();
       }
     }
-
+ 
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') sendMessage();
     });
-
+ 
     // Welcome message
     window.onload = () => {
       initJellyfish();
