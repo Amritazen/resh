@@ -3,7 +3,7 @@ import io
 import os
 import re
 import shutil
-
+ 
 # FIX 1: Force UTF-8 encoding at top for Windows
 sys.stdout = io.TextIOWrapper(
     sys.stdout.buffer,
@@ -15,18 +15,18 @@ sys.stderr = io.TextIOWrapper(
     encoding='utf-8',
     errors='replace'
 )
-
+ 
 from dotenv import load_dotenv
 load_dotenv()
-
+ 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
-
+ 
 # Default path (used only for ingest_folder)
 DEFAULT_CHROMA_PATH = "chroma_db"
-
+ 
 def clean_text(text: str) -> str:
     if not text:
         return text
@@ -45,10 +45,10 @@ def clean_text(text: str) -> str:
     }
     for char, replacement in replacements.items():
         text = text.replace(char, replacement)
-    text = re.sub(r'[^\x00-\x7F]+', ' ', text)
+    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
     return text
-
+ 
 def load_docx_safe(filepath: str):
     try:
         from langchain_community.document_loaders import Docx2txtLoader
@@ -71,18 +71,14 @@ def load_docx_safe(filepath: str):
         except Exception as e2:
             print(f"python-docx failed: {e2}")
             return []
-
+ 
 def get_splitter():
     return RecursiveCharacterTextSplitter(
-        chunk_size=200,
-        chunk_overlap=20,
-        separators=[
-            "\n\n", "\n", ".", "Skills",
-            "Experience", "Projects", "Education",
-            "Certifications", "Summary", " ", ""
-        ]
+        chunk_size=1000,
+        chunk_overlap=150,
+        separators=["\n\n", "\n", ".", " ", ""]
     )
-
+ 
 def get_embeddings():
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
@@ -91,14 +87,14 @@ def get_embeddings():
         model="models/gemini-embedding-001",
         google_api_key=api_key
     )
-
+ 
 # ✅ KEY FIX: chroma_path is now a parameter, not a global
 def ingest_single_file(filepath: str, chroma_path: str):
     print(f"Ingesting: {filepath} → ChromaDB: {chroma_path}")
-
+ 
     ext = filepath.rsplit(".", 1)[-1].lower()
     docs = []
-
+ 
     if ext == "pdf":
         from langchain_community.document_loaders import PyPDFLoader
         loader = PyPDFLoader(filepath)
@@ -121,20 +117,20 @@ def ingest_single_file(filepath: str, chroma_path: str):
     else:
         print(f"Unsupported extension: {ext}")
         return
-
+ 
     for doc in docs:
         doc.page_content = clean_text(doc.page_content)
-
+ 
     docs = [d for d in docs if d.page_content.strip()]
     print(f"Loaded and cleaned {len(docs)} documents")
-
+ 
     splitter = get_splitter()
     chunks = splitter.split_documents(docs)
     chunks = [c for c in chunks if c.page_content.strip()]
     print(f"Created {len(chunks)} chunks")
-
+ 
     embeddings = get_embeddings()
-
+ 
     # ✅ Only clear THIS user's ChromaDB — not everyone's!
     if os.path.exists(chroma_path):
         try:
@@ -142,7 +138,7 @@ def ingest_single_file(filepath: str, chroma_path: str):
             print(f"Cleared old ChromaDB for session: {chroma_path}")
         except Exception as e:
             print(f"Warning: Could not clear old ChromaDB: {e}")
-
+ 
     Chroma.from_documents(
         chunks,
         embeddings,
@@ -150,42 +146,42 @@ def ingest_single_file(filepath: str, chroma_path: str):
     )
     print(f"Created new ChromaDB at: {chroma_path}")
     print(f"Done. Ingested: {os.path.basename(filepath)}")
-
-
+ 
+ 
 def ingest_folder(folder_path="data/"):
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
         print(f"Created folder: {folder_path}")
         return
-
+ 
     print(f"Loading from folder: {folder_path}...")
     from langchain_community.document_loaders import DirectoryLoader
     loader = DirectoryLoader(folder_path, glob="**/*.*")
     docs = loader.load()
-
+ 
     for doc in docs:
         doc.page_content = clean_text(doc.page_content)
     docs = [d for d in docs if d.page_content.strip()]
     print(f"Loaded {len(docs)} documents")
-
+ 
     splitter = get_splitter()
     chunks = splitter.split_documents(docs)
     embeddings = get_embeddings()
-
+ 
     if os.path.exists(DEFAULT_CHROMA_PATH):
         try:
             shutil.rmtree(DEFAULT_CHROMA_PATH)
             print("Old ChromaDB cleared.")
         except:
             print("Warning: Could not clear old ChromaDB. Appending instead.")
-
+ 
     Chroma.from_documents(
         chunks,
         embeddings,
         persist_directory=DEFAULT_CHROMA_PATH
     )
     print("Done. ChromaDB ready.")
-
-
+ 
+ 
 if __name__ == "__main__":
     ingest_folder()
